@@ -1,5 +1,5 @@
 setup:
-	sudo mkdir /opt/scowl
+	sudo mkdir -p /opt/scowl
 
 start: setup
 	docker-compose up -d
