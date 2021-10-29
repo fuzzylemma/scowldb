@@ -14,6 +14,25 @@ import (
 
 )
 
+const QueryError    = "Error querying database"
+const OverflowError = "Overflow error"
+const EncodingError = "Encoding response error"
+const ParseIntError = "Error parsing 'id' parameter"
+
+type WordResponse struct {
+   Word  string    `json:"word"`
+   Id    int64     `json:"id"`
+}
+
+type ErrorResponse struct {
+   Error    string   `json:"error"`
+}
+
+func errorResponse(w *http.ResponseWriter, err error, errorMessage string) {
+   log.Print(err)
+   errResp, _ := json.Marshal(ErrorResponse{errorMessage})
+   http.Error(*w, string(errResp), http.StatusInternalServerError)
+}
 
 func GetRandomWord(w http.ResponseWriter, r *http.Request) {
    scowldb := pdb.NewPostgresDB("")
@@ -23,19 +42,17 @@ func GetRandomWord(w http.ResponseWriter, r *http.Request) {
    bigUint.SetString(vrf, 10) 
    vrfNum, overflow := uint256.FromBig(&bigUint)
    if overflow {
-      log.Print("Overflow on random number")
-      http.Error(w, "Overflow error", http.StatusInternalServerError)
+      errorResponse(&w, nil, OverflowError)
       return
    }
    maxId, err := scowldb.MaxId()
    if err != nil {
-      http.Error(w, "Error during query", http.StatusInternalServerError)
+      errorResponse(&w, err, QueryError)
       return
    }
    maxIdNum, overflow := uint256.FromBig(big.NewInt(maxId))
    if overflow {
-      log.Print("Overflow on random number")
-      http.Error(w, "Overflow error", http.StatusInternalServerError)
+      errorResponse(&w, nil, OverflowError)
       return
    }
 
@@ -44,12 +61,10 @@ func GetRandomWord(w http.ResponseWriter, r *http.Request) {
    id := int64(temp.Uint64() + uint64(1))
    randomWord, err := scowldb.QueryById(id)
 
-   var resp = make(map[string]string)
-   resp["word"] = randomWord
+   var resp = WordResponse{randomWord, id} 
    response, err := json.Marshal(&resp)
    if err != nil {
-      log.Print(err)
-      http.Error(w, "Response encoding error", http.StatusInternalServerError)
+      errorResponse(&w, err, EncodingError)
       return
    }
    w.Header().Add("Content-Type", "application/json")
@@ -63,23 +78,19 @@ func GetWordById(w http.ResponseWriter, r *http.Request) {
    vars := mux.Vars(r)
    id, err := strconv.ParseInt(vars["id"], 10, 64)
    if err != nil {
-      log.Print(err)
-      http.Error(w, "Error parsing `id` parameter", http.StatusInternalServerError)
+      errorResponse(&w, err, ParseIntError)
       return
    }
    word, err := scowldb.QueryById(id)
    if err != nil {
-      log.Print(err)
-      http.Error(w, "Error query database", http.StatusInternalServerError)
+      errorResponse(&w, err, QueryError)
       return
    }
 
-   var resp = make(map[int64]string)
-   resp[id] = word 
-   response, err := json.Marshal(&resp)
+   var resp = WordResponse{word, id} 
+   response, err := json.Marshal(resp)
    if err != nil {
-      log.Print(err)
-      http.Error(w, "Response encoding error", http.StatusInternalServerError)
+      errorResponse(&w, err, EncodingError)
       return
    }
    w.Header().Add("Content-Type", "application/json")
@@ -94,17 +105,14 @@ func GetIdByWord(w http.ResponseWriter, r *http.Request) {
    word := vars["word"]
    id, err := scowldb.QueryByWord(word)
    if err != nil {
-      log.Print(err)
-      http.Error(w, "Error query database", http.StatusInternalServerError)
+      errorResponse(&w, err, QueryError)
       return
    }
  
-   var resp = make(map[string]int64)
-   resp[word] = id
+   var resp = WordResponse{word, id} 
    response, err := json.Marshal(&resp)
    if err != nil {
-      log.Print(err)
-      http.Error(w, "Response encoding error", http.StatusInternalServerError)
+      errorResponse(&w, err, EncodingError)
       return
    }
    w.Header().Add("Content-Type", "application/json")
@@ -118,8 +126,7 @@ func WordCount(w http.ResponseWriter, r *http.Request) {
 
    count, err := scowldb.WordCount()
    if err != nil {
-      log.Print(err)
-      http.Error(w, "Error query database", http.StatusInternalServerError)
+      errorResponse(&w, err, QueryError)
       return
    }
  
@@ -127,8 +134,7 @@ func WordCount(w http.ResponseWriter, r *http.Request) {
    resp["count"] = count 
    response, err := json.Marshal(&resp)
    if err != nil {
-      log.Print(err)
-      http.Error(w, "Response encoding error", http.StatusInternalServerError)
+      errorResponse(&w, err, EncodingError)
       return
    }
    w.Header().Add("Content-Type", "application/json")
@@ -141,8 +147,7 @@ func MaxId(w http.ResponseWriter, r *http.Request) {
 
    maxid, err := scowldb.MaxId()
    if err != nil {
-      log.Print(err)
-      http.Error(w, "Error query database", http.StatusInternalServerError)
+      errorResponse(&w, err, QueryError)
       return
    }
  
@@ -150,8 +155,7 @@ func MaxId(w http.ResponseWriter, r *http.Request) {
    resp["maxid"] = maxid
    response, err := json.Marshal(&resp)
    if err != nil {
-      log.Print(err)
-      http.Error(w, "Response encoding error", http.StatusInternalServerError)
+      errorResponse(&w, err, EncodingError)
       return
    }
    w.Header().Add("Content-Type", "application/json")

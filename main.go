@@ -78,7 +78,7 @@ func main() {
 
    var populate bool = false
    var rootCmd = &cobra.Command {
-      Use: "scowlapi",
+      Use: "scowldb",
       Short: "start api server for scowl database",
       Long: `start api server for scowl database`,
       Run: func(cmd *cobra.Command, args []string) { 
