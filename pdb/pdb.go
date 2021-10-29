@@ -126,7 +126,10 @@ func (pdb *PostgresDB) QueryByWord(word string) (int64, error) {
 
    var id int64
    rows, err := db.Query(`SELECT id FROM words where word = $1`, word)
-   utils.Check(err)
+   if err != nil {
+      return -1, err
+   }
+ 
    if rows.Next() {
       rows.Scan(&id)
    } else {
@@ -144,7 +147,9 @@ func (pdb *PostgresDB) QueryById(id int64) (string, error) {
 
    var word string 
    rows, err := db.Query(`SELECT word FROM words where id = $1`, id)
-   utils.Check(err)
+   if err != nil {
+      return "", err
+   }
    if rows.Next() {
       rows.Scan(&word)
    } else {
