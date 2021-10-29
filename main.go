@@ -12,6 +12,7 @@ import (
    "strings"
    "io/ioutil"
 
+   "github.com/spf13/cobra"
    postgresdb "github.com/fuzzylemma/scowldb/pdb"
    server "github.com/fuzzylemma/scowldb/server"
    "github.com/fuzzylemma/scowldb/utils"
@@ -75,11 +76,22 @@ func startServer() {
 
 func main() {
 
-   if (false) {
-      populatePostgresDB()
+   var populate bool = false
+   var rootCmd = &cobra.Command {
+      Use: "scowlapi",
+      Short: "start api server for scowl database",
+      Long: `start api server for scowl database`,
+      Run: func(cmd *cobra.Command, args []string) { 
+         if (populate) {
+            populatePostgresDB()
+         }
+         startServer() 
+      },
    }
-   if (false) {
-      startServer()
-   }
+
+   rootCmd.PersistentFlags().BoolVarP(&populate, "populate", "p", false, "populate database with words from scowl")
+
+   err := rootCmd.Execute()
+   utils.Check(err)
 
 }
