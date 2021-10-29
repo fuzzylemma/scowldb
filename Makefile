@@ -9,3 +9,9 @@ getscowl:
 
 unzip:
 	tar -xvf scowl-2020.12.07.tar.gz 
+
+build:
+	docker build -t fuzzylemma/scowldb .
+
+push:
+	docker push fuzzylemma/scowldb

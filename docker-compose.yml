@@ -9,3 +9,7 @@ services:
       - 5532:5432
     volumes:
       - scowldb:/opt/scowl
+  scowlapi:
+    image: "fuzzylemma/scowldb:latest"
+    ports: 
+      - 8888:8888
