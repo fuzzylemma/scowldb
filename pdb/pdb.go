@@ -81,8 +81,7 @@ func (pdb *PostgresDB) InsertWord(word string) {
    insertQuery := fmt.Sprintf(`INSERT INTO words (id, word) VALUES ($1, $2);`)
    _, e := db.Exec(insertQuery, id, word)
    if e != nil {
-      fmt.Println(id, insertQuery)
-      fmt.Println(e)
+      fmt.Println(id, word, e)
    }
 }
 
@@ -92,11 +91,15 @@ func (pdb *PostgresDB) MaxId() (int64, error) {
    defer db.Close()
    utils.Check(err)
 
-   id := int64(0)
-   if err := db.QueryRow("SELECT MAX(id) FROM words;").Scan(&id); err != nil {
-      return -1, err
+   id := 0 
+   if row := db.QueryRow("SELECT MAX(id) FROM words;"); row.Err() == nil {
+      if err := row.Scan(&id); err != nil {
+         if err != sql.ErrNoRows {
+            return -1, err
+         }
+      }
    }
-   return id, nil
+   return int64(id), nil
 }
 /** Returns number of words in database */
 func (pdb *PostgresDB) WordCount() (int64, error) {
@@ -104,11 +107,15 @@ func (pdb *PostgresDB) WordCount() (int64, error) {
    defer db.Close()
    utils.Check(err)
 
-   count := int64(0)
-   if err := db.QueryRow("SELECT count(*) FROM words;").Scan(&count); err != nil {
-      return -1, err
+   count := 0
+   if row := db.QueryRow("SELECT count(*) FROM words;"); row.Err() == nil {
+      if err := row.Scan(&count); err != nil {
+         if err != sql.ErrNoRows {
+            return -1, err
+         }
+      }
    }
-   return count, nil 
+   return int64(count), nil 
 }
 
 /** Returns id given word */

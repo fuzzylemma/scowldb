@@ -44,19 +44,15 @@ func populatePostgresDB() {
       for scanner.Scan() {
          word := scanner.Text()
          if (len(word) == 0) { continue }
+         if (strings.Contains(word, "'")) { continue }
          pdb.InsertWord(word)
       }
-      
    }
 }
 
-func main() {
+func startServer() {
+
    var wait time.Duration
-
-   if (false) {
-      populatePostgresDB()
-   }
-
    srv := server.NewServer()
    httpSrv := srv.HttpServer()
 	go func() {
@@ -74,4 +70,16 @@ func main() {
    httpSrv.Shutdown(ctx)
 
 	log.Println("shutting down")
+}
+
+
+func main() {
+
+   if (false) {
+      populatePostgresDB()
+   }
+   if (false) {
+      startServer()
+   }
+
 }
