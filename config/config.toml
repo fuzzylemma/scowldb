@@ -1,6 +1,11 @@
 [sql]
-host = "localhost"
-port = 5432 
-dbname = ""
-user = ""
-password = ""
+host = "192.168.1.47"
+port = 5532 
+dbname = "scowldb"
+user = "scowl"
+password = "scowlandfriends"
+
+
+[serve]
+host = "0.0.0.0"
+port = "8888"
