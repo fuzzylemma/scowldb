@@ -58,7 +58,7 @@ func GetRandomWord(w http.ResponseWriter, r *http.Request) {
 
    var temp uint256.Int
    temp.Mod(vrfNum, maxIdNum)
-   id := int64(temp.Uint64() + uint64(1))
+   id := int64(temp.Uint64())
    randomWord, err := scowldb.QueryById(id)
 
    var resp = WordResponse{randomWord, id} 
