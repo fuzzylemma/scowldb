@@ -40,6 +40,7 @@ func NewPostgresDB(pathToConfig string) *PostgresDB {
       viper.AddConfigPath(pathToConfig)
       err := viper.ReadInConfig()
       utils.Check(err)
+
       host = viper.GetString("sql.host")
       port = viper.GetString("sql.port")
       dbname = viper.GetString("sql.dbname")
@@ -66,6 +67,9 @@ func (pdb *PostgresDB) CreateWordTable() {
 }
 
 func (pdb *PostgresDB) psqlConnString() string {
+   if pdb.Port == "" {
+      return fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", pdb.Host, pdb.User, pdb.Password, pdb.Name)
+   }
    return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", pdb.Host, pdb.Port, pdb.User, pdb.Password, pdb.Name)
 }
 
@@ -100,7 +104,7 @@ func (pdb *PostgresDB) MaxId() (int64, error) {
    if row := db.QueryRow("SELECT MAX(id) FROM words;"); row.Err() == nil {
       if err := row.Scan(&id); err != nil {
          if err != sql.ErrNoRows {
-            return -1, err
+            return 0, nil
          }
       }
    }
@@ -116,7 +120,7 @@ func (pdb *PostgresDB) WordCount() (int64, error) {
    if row := db.QueryRow("SELECT count(*) FROM words;"); row.Err() == nil {
       if err := row.Scan(&count); err != nil {
          if err != sql.ErrNoRows {
-            return -1, err
+            return 0, nil
          }
       }
    }

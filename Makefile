@@ -1,7 +1,7 @@
 setup:
 	sudo mkdir -p /opt/scowl
 
-start: setup
+start: 
 	docker-compose up -d
 
 getscowl:
@@ -11,7 +11,7 @@ unzip:
 	tar -xvf scowl-2020.12.07.tar.gz 
 
 build:
-	docker build -t fuzzylemma/scowldb:latest .
+	docker build --no-cache -t fuzzylemma/scowldb:latest .
 
 push:
 	docker push fuzzylemma/scowldb:latest

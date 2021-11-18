@@ -9,7 +9,7 @@ services:
     ports: 
       - 5532:5432
     volumes:
-      - scowldb:/opt/scowl
+      - scowldb:/var/lib/postgresql/data
 
   scowlapi:
     image: "docker.io/fuzzylemma/scowldb:latest"
