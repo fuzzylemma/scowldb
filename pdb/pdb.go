@@ -1,6 +1,7 @@
 package pdb 
 
 import (
+   "os"
    "fmt"
    "log"
    "errors"
@@ -27,20 +28,24 @@ type PostgresDB struct {
 
 
 func NewPostgresDB(pathToConfig string) *PostgresDB {
+   var host, port, dbname, user, password string
    if pathToConfig == "" {
-      pathToConfig = "./config"
+      host = os.Getenv("SCOWLDB_HOST")
+      port = os.Getenv("SCOWLDB_PORT")
+      dbname = os.Getenv("POSTGRES_DB")
+      user = os.Getenv("POSTGRES_USER")
+      password = os.Getenv("POSTGRES_PASSWORD")
+   } else {
+      viper.SetConfigName("config")
+      viper.AddConfigPath(pathToConfig)
+      err := viper.ReadInConfig()
+      utils.Check(err)
+      host = viper.GetString("sql.host")
+      port = viper.GetString("sql.port")
+      dbname = viper.GetString("sql.dbname")
+      user = viper.GetString("sql.user")
+      password = viper.GetString("sql.password")
    }
-   viper.SetConfigName("config")
-   viper.AddConfigPath(pathToConfig)
-   err := viper.ReadInConfig()
-
-   utils.Check(err)
-
-   host := viper.GetString("sql.host")
-   port := viper.GetString("sql.port")
-   dbname := viper.GetString("sql.dbname")
-   user := viper.GetString("sql.user")
-   password := viper.GetString("sql.password")
    return &PostgresDB{host, port, dbname, user, password}
 }
 

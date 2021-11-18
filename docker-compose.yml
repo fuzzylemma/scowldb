@@ -1,6 +1,7 @@
 volumes:
   scowldb:
 services:
+
   database:
     image: "postgres:alpine"
     env_file: 
@@ -9,7 +10,14 @@ services:
       - 5532:5432
     volumes:
       - scowldb:/opt/scowl
+
   scowlapi:
-    image: "fuzzylemma/scowldb:latest"
+    image: "docker.io/fuzzylemma/scowldb:latest"
+    environment:
+      - SCOWLDB_HOST="192.168.1.47"
+      - SCOWLDB_PORT="5532"
+      - POSTGRES_USER="scowl"
+      - POSTGRES_PASSWORD="scowlandfriends"
+      - POSTGRES_DB="scowldb"
     ports: 
       - 8888:8888
