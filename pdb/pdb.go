@@ -30,8 +30,8 @@ type PostgresDB struct {
 func NewPostgresDB(pathToConfig string) *PostgresDB {
    var host, port, dbname, user, password string
    if pathToConfig == "" {
-      host = os.Getenv("SCOWLDB_HOST")
-      port = os.Getenv("SCOWLDB_PORT")
+      host = os.Getenv("POSTGRES_HOST")
+      port = os.Getenv("POSTGRES_PORT")
       dbname = os.Getenv("POSTGRES_DB")
       user = os.Getenv("POSTGRES_USER")
       password = os.Getenv("POSTGRES_PASSWORD")
